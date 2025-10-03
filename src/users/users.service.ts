@@ -6,6 +6,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { createProfileDto } from './dto/create-profile.dto';
 import { Profile } from './entities/profile.entity';
+import * as bcrypt from 'bcryptjs';
+
 
 @Injectable()
 export class UsersService {
@@ -25,18 +27,38 @@ export class UsersService {
         if(userFound) {
             throw new HttpException('Usuario ya existe', HttpStatus.CONFLICT);
         }
-        const newUser = this.usersRepository.create(user);
+
+        //const salt = 10;
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(user.password, salt);
+
+        const newUser = this.usersRepository.create({
+            ...user,
+            password: hashed
+        });
+
         const saved = await this.usersRepository.save(newUser);
-        return { message: 'Usuario creado correctamente', data: saved };
+        // no devolver la contraseña
+        // alternativa: delete saved.password;
+        const { password, ...result } = saved as any;
+        return { message: 'Usuario creado correctamente', data: result };
+    }
+
+    // Devuelve el usuario incluyendo la contraseña (necesario para autenticación)
+    async findByUsernameWithPassword(username: string) {
+        return this.usersRepository.findOne({
+            where: { username },
+            select: ['id', 'username', 'password', 'rol']
+        });
     }
 
     getUsers(){
-        return this.usersRepository.find().then(users => ({  contador: users.length, message: 'Listado de usuarios', data: users}));
+        return this.usersRepository.find({relations: ['posts', 'profile']}).then(users => ({  contador: users.length, message: 'Listado de usuarios', data: users}));
     }
 
     async searchUser(id: number){
          const userFound= await this.usersRepository.findOne({
-            where: { id }
+            where: { id }, relations: ['profile', 'posts']  // Asegura que las relaciones 'profile' y 'posts' se carguen con el usuario
         });
 
         if(!userFound) {

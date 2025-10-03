@@ -4,13 +4,20 @@ import { User } from './entities/users.entity';
 import { UsersService } from './users.service';
 import { createProfileDto } from './dto/create-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('users')
+@ApiTags('Usuarios')
+@ApiResponse({ status: 200, description: 'Todo copas.' })
+/* @ApiResponse({ status: 404, description: 'No encontrado.' })
+@ApiResponse({ status: 403, description: 'Prohibido.' })
+@ApiResponse({ status: 500, description: 'Error interno del servidor.' }) */
 export class UsersController {
 
     constructor(private usersService: UsersService) {}
 
     @Get()
+    @ApiOperation({ summary: 'Obtener todos los usuarios' })
     getUsers(){
         return this.usersService.getUsers();
     }
