@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Param, ParseIntPipe, Delete, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, ParseIntPipe, Delete, Patch, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/users.entity';
 import { UsersService } from './users.service';
 import { createProfileDto } from './dto/create-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 @Controller('users')
 @ApiTags('Usuarios')
@@ -17,6 +18,7 @@ export class UsersController {
     constructor(private usersService: UsersService) {}
 
     @Get()
+    @UseGuards(AuthGuard)
     @ApiOperation({ summary: 'Obtener todos los usuarios' })
     getUsers(){
         return this.usersService.getUsers();

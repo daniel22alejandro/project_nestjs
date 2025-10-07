@@ -30,6 +30,15 @@ async function bootstrap() {
 
   // Habilita validación de DTOs globalmente
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+  
+  
+  // Habilitar CORS para el frontend Angular en http://localhost:4200
+  app.enableCors({
+    origin: process.env.FRONTEND_ORIGIN || 'http://localhost:4200',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+    credentials: true,
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
